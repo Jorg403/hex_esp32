@@ -4,6 +4,7 @@
 ServoHandler::ServoHandler(ServoController& controller)
     : servoController(controller) {}
 
+short int __PRINT_ALTERNATION__ = 0;
 String ServoHandler::handleSrvCommand(const String& command) {
     int firstSpace = command.indexOf(' ');
     String action = (firstSpace == -1) ? command : command.substring(0, firstSpace);
@@ -16,7 +17,7 @@ String ServoHandler::handleSrvCommand(const String& command) {
         if (sscanf(params.c_str(), "%d %d", &servoId, &position) == 2) {
             servoController.setServo(servoId, position);
         }
-    } else if (action == "set_ManualPWM") {
+    } else if (action == "set_manualPWM") {
         int servoId, pwmValue;
         if (sscanf(params.c_str(), "%d %d", &servoId, &pwmValue) == 2) {
             servoController.setManualPWM(servoId, pwmValue);
@@ -43,7 +44,9 @@ String ServoHandler::handleSrvCommand(const String& command) {
     } else {
         return "Unknown command: " + action;
     }
-    return "Success";
+    __PRINT_ALTERNATION__ = (__PRINT_ALTERNATION__ + 1) % 6;
+    // returns success with |-,\-,-\,-|,-/ or /- depending on value of __PRINT_ALTERNATION__
+    return String(__PRINT_ALTERNATION__ == 0 ? "|-" : (__PRINT_ALTERNATION__ == 1 ? "\\-" : (__PRINT_ALTERNATION__ == 2 ? "-\\" : (__PRINT_ALTERNATION__ == 3 ? "-|" : (__PRINT_ALTERNATION__ == 4 ? "-/" : "/-"))))) + "Success";
 }
 
 void ServoHandler::setPositions(const String& params) {

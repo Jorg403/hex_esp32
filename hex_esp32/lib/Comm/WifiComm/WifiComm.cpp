@@ -5,11 +5,21 @@
 WifiComm::WifiComm() : _server(80) {}
 
 void WifiComm::begin() {
-    WiFi.begin(_ssid, _password);
-    Serial.print("Connecting to WiFi");
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
+    while(WiFi.status() != WL_CONNECTED) {
+        WiFi.begin(_ssid, _password);
+        Serial.print("Connecting to WiFi");
+        for (int i=0; WiFi.status() != WL_CONNECTED && i<15; i++) {
+            delay(500);
+            Serial.print(".");
+        }
+        if (WiFi.status() != WL_CONNECTED) {
+            WiFi.begin(_ssid2, _password2);
+            Serial.print("Connecting to WiFi2");
+            for (int i=0; WiFi.status() != WL_CONNECTED && i<15; i++) {
+                delay(500);
+                Serial.print(".");
+            }
+        }
     }
     Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
 

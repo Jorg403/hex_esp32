@@ -1,4 +1,5 @@
 #include "ServoController.h"
+#include "Consts.h"
 
 ServoController::ServoController() : pwm(Adafruit_PWMServoDriver()) {
     servoAngles = {90, 90};  // Default positions
@@ -68,7 +69,7 @@ void ServoController::setSpeed(int servoIdx, int speed) {
 void ServoController::update() {
     for (int i = 0; i < 2; i++) {
         if (servoEnabled[i]) {
-            servoAngles[i] += servoSpeeds[i];
+            servoAngles[i] += (servoSpeeds[i] * __DELTA_TIME__)/1000.0;
             if (servoAngles[i] < 0) servoAngles[i] = 0;
             else if (servoAngles[i] > 180) servoAngles[i] = 180;
             move(i, servoAngles[i]);
@@ -81,18 +82,17 @@ void ServoController::setManualPWM(int servoNum, int pulse) {
     pwm.setPWM(servoNum, 0, pulse);
 }
 
-void ServoController::move(int servoNum, int angle) {
-    int pulse = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+void ServoController::move(int servoNum, float angle) {
+    int pulse = map((int)angle, 0, 180, SERVOMIN, SERVOMAX);
     pwm.setPWM(servoNum, 0, pulse);
 }
 
 String ServoController::getStatus() {
-    String status = "=== ServoController Status ===\n";
+    String status = "===ServoController Status===\n";
     for (int i = 0; i < servoAngles.size(); i++) {
         status += "Servo " + String(i) + ": Angle = " + String(servoAngles[i]) +
                   ", Speed = " + String(servoSpeeds[i]) +
                   ", Enabled = " + String(servoEnabled[i] ? "Yes" : "No") + "\n";
     }
-    status += "=============================\n";
     return status;
 }

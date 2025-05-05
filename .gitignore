@@ -30,3 +30,4 @@
 *.exe
 *.out
 *.app
+hex_esp32/lib/consts/WiFiConsts.cpp

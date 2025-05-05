@@ -1,6 +1,7 @@
 #include "CommManager.h"
 #include "ServoController.h"
 #include "ServoHandler.h"
+#include "Consts.h"
 #include <Arduino.h>
 
 ServoHandler* servoHandler;
@@ -9,8 +10,6 @@ ServoHandler* servoHandler;
 CommManager* comm;
 QueueHandle_t commandQueue;  // Queue to hold commands
 QueueHandle_t responseQueue;  // Queue to hold responses
-
-const int CMD_MAX_LEN = 128;  // Max command string length
 
 void communicationTask(void *pvParameters);
 
@@ -22,8 +21,8 @@ void setup() {
     comm->begin();
 
     // Create a FIFO queue to hold commands (with space for 10 commands)
-    commandQueue = xQueueCreate(10, CMD_MAX_LEN);  // Now stores char arrays
-    responseQueue = xQueueCreate(10, CMD_MAX_LEN);  // Now stores char arrays
+    commandQueue = xQueueCreate(10, __CMD_MAX_LEN__);  // Now stores char arrays
+    responseQueue = xQueueCreate(10, __CMD_MAX_LEN__);  // Now stores char arrays
 
     // Create a task for communication handling (Core 0)
     xTaskCreatePinnedToCore(
@@ -45,7 +44,7 @@ void loop() {
     unsigned long loopStartTime = millis();  // Start time
 
     // Check if there are commands in the queue
-    char cmdBuffer[CMD_MAX_LEN];
+    char cmdBuffer[__CMD_MAX_LEN__];
     if (xQueueReceive(commandQueue, cmdBuffer, 0) == pdTRUE) {
         String cmd(cmdBuffer);
         String response = servoHandler->handleSrvCommand(cmd);
@@ -58,8 +57,13 @@ void loop() {
 
     unsigned long loopEndTime = millis();
     unsigned long loopDuration = loopEndTime - loopStartTime;
-    unsigned long delayTime = 10 - loopDuration;
+    unsigned long delayTime = __DELTA_TIME__ - loopDuration;
 
+    if (delayTime < 0) {
+        if (xQueueSend(responseQueue, "Loop took too long", 0) != pdPASS) {
+            Serial.println("Failed to send loop duration message.");
+        }
+    }
     if (delayTime > 0) {
         delay(delayTime);
     }
@@ -71,17 +75,17 @@ void communicationTask(void *pvParameters) {
             String incomingCmd = comm->read();
             //Serial.println("Command received: " + incomingCmd);
 
-            char cmdBuffer[CMD_MAX_LEN];
-            incomingCmd.toCharArray(cmdBuffer, CMD_MAX_LEN);
+            char cmdBuffer[__CMD_MAX_LEN__];
+            incomingCmd.toCharArray(cmdBuffer, __CMD_MAX_LEN__);
 
             if (xQueueSend(commandQueue, cmdBuffer, portMAX_DELAY) != pdPASS) {
                 Serial.println("Failed to add command to queue.");
             }
         }
 
-        delay(10);
+        delay(__DELTA_TIME__);
         
-        char resBuffer[CMD_MAX_LEN];
+        char resBuffer[__CMD_MAX_LEN__];
         if (xQueueReceive(responseQueue, resBuffer, 0) == pdTRUE) {
             String response(resBuffer);
             comm->send(response);  // Send the response back

@@ -33,14 +33,14 @@ public:
     
 private:
     Adafruit_PWMServoDriver pwm;
-    std::vector<int> servoAngles;  // Vector to store servo angles
+    std::vector<float> servoAngles;  // Vector to store servo angles
     std::vector<int> servoSpeeds;  // Vector to store speed of each servo
     bool servoEnabled[2];          // To track if servos are enabled
     const int SERVOMIN = 150;
     const int SERVOMAX = 730;
 
     // Helper function to move the servo
-    void move(int servoNum, int angle);
+    void move(int servoNum, float angle);
 };
 
 #endif
