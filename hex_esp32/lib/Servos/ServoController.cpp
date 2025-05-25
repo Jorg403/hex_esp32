@@ -2,10 +2,17 @@
 #include "Consts.h"
 
 ServoController::ServoController() : pwm(Adafruit_PWMServoDriver()) {
-    servoAngles = {90, 90};  // Default positions
-    servoSpeeds = {0, 0};    // Default speed
-    servoEnabled[0] = true;
-    servoEnabled[1] = true;
+    for (int i = 0; i < SERVO_COUNT; i++) {
+        if (i%3 == 0) {
+            servoAngles.push_back(0.0);
+        } else if (i%3 == 1) {
+            servoAngles.push_back(0.0);
+        } else {
+            servoAngles.push_back(0.0);
+        }
+        servoSpeeds.push_back(0);     // Initialize speeds to 0
+        servoEnabled[i] = true;      // Initialize all servos as disabled
+    }
 }
 
 void ServoController::begin() {
@@ -14,64 +21,65 @@ void ServoController::begin() {
 }
 
 void ServoController::setServo(int servoIdx, int angle) {
-    if (servoIdx >= 0 && servoIdx < servoAngles.size()) {
-        servoAngles[servoIdx] = constrain(angle, 0, 180);
+    if (servoIdx >= 0 && servoIdx < SERVO_COUNT) {
+        servoAngles[servoIdx] = constrain(angle, __SERVO_MIN_POS__[servoIdx], __SERVO_MAX_POS__[servoIdx]);
     }
 }
 
 void ServoController::setServos(std::vector<int> angles) {
-    for (int i = 0; i < angles.size() && i < servoAngles.size(); i++) {
-        servoAngles[i] = constrain(angles[i], 0, 180);
+    for (int i = 0; i < angles.size() && i < SERVO_COUNT; i++) {
+        servoAngles[i] = constrain(angles[i], __SERVO_MIN_POS__[i], __SERVO_MAX_POS__[i]);
     }
 }
 
 void ServoController::moveServo(int servoIdx, int offset) {
-    if (servoIdx >= 0 && servoIdx < servoAngles.size()) {
+    if (servoIdx >= 0 && servoIdx < SERVO_COUNT) {
         servoAngles[servoIdx] += offset;
-        servoAngles[servoIdx] = constrain(servoAngles[servoIdx], 0, 180);
+        servoAngles[servoIdx] = constrain(servoAngles[servoIdx], __SERVO_MIN_POS__[servoIdx], __SERVO_MAX_POS__[servoIdx]);
     }
 }
 
 void ServoController::enableServo(int servoIdx) {
-    if (servoIdx >= 0 && servoIdx < 2) {
+    if (servoIdx >= 0 && servoIdx < SERVO_COUNT) {
         servoEnabled[servoIdx] = true;
     }
 }
 
 void ServoController::disableServo(int servoIdx) {
-    if (servoIdx >= 0 && servoIdx < 2) {
+    if (servoIdx >= 0 && servoIdx < SERVO_COUNT) {
         servoEnabled[servoIdx] = false;
     }
 }
 
 void ServoController::enableServos() {
-    servoEnabled[0] = true;
-    servoEnabled[1] = true;
+    for (int i = 0; i < SERVO_COUNT; i++) {
+        servoEnabled[i] = true;
+    }
 }
 
 void ServoController::disableServos() {
-    servoEnabled[0] = false;
-    servoEnabled[1] = false;
+    for (int i = 0; i < SERVO_COUNT; i++) {
+        servoEnabled[i] = false;
+    }
 }
 
 void ServoController::setSpeeds(std::vector<int> speeds) {
-    for (int i = 0; i < speeds.size() && i < servoSpeeds.size(); i++) {
+    for (int i = 0; i < speeds.size() && i < SERVO_COUNT; i++) {
         servoSpeeds[i] = speeds[i];
     }
 }
 
 void ServoController::setSpeed(int servoIdx, int speed) {
-    if (servoIdx >= 0 && servoIdx < 2) {
+    if (servoIdx >= 0 && servoIdx < SERVO_COUNT) {
         servoSpeeds[servoIdx] = speed;
     }
 }
 
 void ServoController::update() {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < SERVO_COUNT; i++) {
         if (servoEnabled[i]) {
             servoAngles[i] += (servoSpeeds[i] * __DELTA_TIME__)/1000.0;
-            if (servoAngles[i] < 0) servoAngles[i] = 0;
-            else if (servoAngles[i] > 180) servoAngles[i] = 180;
+            servoAngles[i] = constrain(servoAngles[i], __SERVO_MIN_POS__[i], __SERVO_MAX_POS__[i]);
             move(i, servoAngles[i]);
         }
     }
@@ -83,13 +91,13 @@ void ServoController::setManualPWM(int servoNum, int pulse) {
 }
 
 void ServoController::move(int servoNum, float angle) {
-    int pulse = map((int)angle, 0, 180, SERVOMIN, SERVOMAX);
+    int pulse = map((int)angle, -90, 0, __SERVO_neg90_PWMs__[servoNum], __SERVO_0_PWMs__[servoNum]);
     pwm.setPWM(servoNum, 0, pulse);
 }
 
 String ServoController::getStatus() {
     String status = "===ServoController Status===\n";
-    for (int i = 0; i < servoAngles.size(); i++) {
+    for (int i = 0; i < SERVO_COUNT; i++) {
         status += "Servo " + String(i) + ": Angle = " + String(servoAngles[i]) +
                   ", Speed = " + String(servoSpeeds[i]) +
                   ", Enabled = " + String(servoEnabled[i] ? "Yes" : "No") + "\n";

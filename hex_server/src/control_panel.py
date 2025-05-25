@@ -1,29 +1,28 @@
 import argparse
 import requests
 import cv2
-
-def send_command(ip, command):
-    url = f'http://{ip}/?cmd={command}'
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            print(f"→ {command}")
-            if response.text.strip():
-                print(f"\n{response.text}")
-        else:
-            print(f"Error al enviar el comando. Estado: {response.status_code}")
-    except requests.exceptions.RequestException:
-        pass
+from comm.comm_constructor import create_comm
 
 def main():
     parser = argparse.ArgumentParser(description="Envía comandos al ESP32 a través de WiFi.")
-    parser.add_argument('--IP', required=True, help="La dirección IP del ESP32 en la red local.")
+    parser.add_argument('--IP', required=False, help="La dirección IP del ESP32 en la red local.")
+    parser.add_argument('--COM', required=False, help="Puerto COM para la comunicación serial.")
+    
     args = parser.parse_args()
 
-    ip = args.IP
-    print(f"Conectado a {ip}")
+    if args.IP is not None:
+        # Si se proporciona una IP, se utiliza la comunicación WiFi
+        comm = create_comm('wifi', ip=args.IP)
+    elif args.COM is not None:
+        # Si se proporciona un puerto COM, se utiliza la comunicación Bluetooth
+        comm = create_comm('bluetooth', port=args.COM)
+    else:
+        print("Error: Debe proporcionar una dirección IP o un puerto COM.")
+        return
 
-    velocidad = 5
+    print(f"Conectado")
+
+    velocidad = 30
     servo0_enabled = True
     servo1_enabled = True
 
@@ -44,33 +43,33 @@ def main():
             state_w = not state_w
             state_s = False
             if state_w:
-                send_command(ip, f"set_speed 1 {velocidad}")
+                comm.send_command(f"set_speed 1 {velocidad}")
             else:
-                send_command(ip, "set_speed 1 0")
+                comm.send_command("set_speed 1 0")
 
         elif key_char == 's':
             state_s = not state_s
             state_w = False
             if state_s:
-                send_command(ip, f"set_speed 1 {-velocidad}")
+                comm.send_command(f"set_speed 1 {-velocidad}")
             else:
-                send_command(ip, "set_speed 1 0")
+                comm.send_command("set_speed 1 0")
 
         elif key_char == 'a':
             state_a = not state_a
             state_d = False
             if state_a:
-                send_command(ip, f"set_speed 0 {-velocidad}")
+                comm.send_command(f"set_speed 0 {-velocidad}")
             else:
-                send_command(ip, "set_speed 0 0")
+                comm.send_command("set_speed 0 0")
 
         elif key_char == 'd':
             state_d = not state_d
             state_a = False
             if state_d:
-                send_command(ip, f"set_speed 0 {velocidad}")
+                comm.send_command(f"set_speed 0 {velocidad}")
             else:
-                send_command(ip, "set_speed 0 0")
+                comm.send_command("set_speed 0 0")
 
         elif key_char == 'r':
             velocidad += 1
@@ -82,30 +81,30 @@ def main():
 
         elif key_char == 'z':
             if servo0_enabled:
-                send_command(ip, "set_manualPWM 0 0")
+                comm.send_command("set_manualPWM 0 0")
             else:
-                send_command(ip, "enable 0")
+                comm.send_command("enable 0")
             servo0_enabled = not servo0_enabled
 
         elif key_char == 'x':
             if servo1_enabled:
-                send_command(ip, "set_manualPWM 1 0")
+                comm.send_command("set_manualPWM 1 0")
             else:
-                send_command(ip, "enable 1")
+                comm.send_command("enable 1")
             servo1_enabled = not servo1_enabled
 
         elif key_char == 'q':
-            send_command(ip, "print_status")
+            comm.send_command("print_status")
 
         elif key_char == 'p':
             n1 = input("Servo: ")
             n2 = input("PWM: ")
-            send_command(ip, f"set_manualPWM {n1} {n2}")
+            comm.send_command(f"set_manualPWM {n1} {n2}")
 
         elif key_char == 'm':
             n1 = input("Servo: ")
             n2 = input("Position: ")
-            send_command(ip, f"set_position {n1} {n2}")
+            comm.send_command(f"set_position {n1} {n2}")
 
         elif key_char == 'h':
             print("Comandos disponibles:")

@@ -1,22 +1,31 @@
-#include "../IComm.h"
+#include "BluetoothComm.h"
 
-class BluetoothComm : public IComm {
-public:
-    void begin() override {
-        //Serial.println("Not implemented yet: BluetoothComm::begin()");
-    }
+BluetoothComm::BluetoothComm() {}
 
-    bool available() override {
-        //Serial.println("Not implemented yet: BluetoothComm::available()");
-        return false; // Placeholder
+void BluetoothComm::begin() {
+    if (!_btSerial.begin("ESP32_BT")) {  // Nombre Bluetooth
+        Serial.println("Error inicializando Bluetooth");
+    } else {
+        Serial.println("Bluetooth iniciado. Visible como 'ESP32_BT'");
     }
+}
 
-    String read() override {
-        //Serial.println("Not implemented yet: BluetoothComm::read()");
-        return ""; // Placeholder
+bool BluetoothComm::available() {
+    if (_btSerial.available()) {
+        _incomingData = _btSerial.readStringUntil('\n');  // lee hasta newline o timeout
+        _incomingData.trim();  // elimina saltos de línea y espacios extras
+        return true;
     }
+    return false;
+}
 
-    void send(const String& data) override {
-        //Serial.println("Not implemented yet: BluetoothComm::send()");
-    }
-};
+String BluetoothComm::read() {
+    String temp = _incomingData;
+    _incomingData = "";
+    return temp;
+}
+
+void BluetoothComm::send(const String& data) {
+    // _btSerial.println(data);
+    Serial.println(data);  // log
+}

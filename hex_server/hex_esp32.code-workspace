@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "hex_esp32",
+			"path": "../hex_esp32"
+		}
+	],
+	"settings": {}
+}

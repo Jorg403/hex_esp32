@@ -2,21 +2,8 @@ import argparse
 import requests
 import time
 import numpy as np
+from comm.comm_constructor import create_comm
 
-def send_command(ip, command):
-    url = f'http://{ip}/?cmd={command}'
-    print(f"Enviando comando: {command}")
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            # print(f"→ {command}")
-            if response.text.strip():
-                print(f"\n{response.text}")
-        else:
-            print(f"Error al enviar el comando. Estado: {response.status_code}")
-    except requests.exceptions.RequestException:
-        pass
-    print(f"Comando enviado: {command}")
 
 def map_value(value, in_min, in_max, out_min, out_max):
     """Mapea un valor de un rango a otro."""
@@ -28,16 +15,26 @@ def func_1(i):
 
 def main():
     parser = argparse.ArgumentParser(description="Control en bucle")
-    parser.add_argument('--IP', required=True, help="La dirección IP del ESP32 en la red local.")
+    parser.add_argument('--IP', required=False, help="La dirección IP del ESP32 en la red local.")
+    parser.add_argument('--COM', required=False, help="Puerto COM para la comunicación serial.")
+    
     args = parser.parse_args()
 
-    ip = args.IP
+    if args.IP is not None:
+        # Si se proporciona una IP, se utiliza la comunicación WiFi
+        comm = create_comm('wifi', ip=args.IP)
+    elif args.COM is not None:
+        # Si se proporciona un puerto COM, se utiliza la comunicación Bluetooth
+        comm = create_comm('bluetooth', port=args.COM)
+    else:
+        print("Error: Debe proporcionar una dirección IP o un puerto COM.")
+        return
 
-    print(f"Conectado a {ip}")
+    print(f"Conectado")
         
     angle_x = 90
     angle_y = 90
-    delta = 0.05
+    delta = 0.
 
     i = 0
     # we select func1 as next_angle_x function
@@ -46,10 +43,10 @@ def main():
     while True:
         time.sleep(delta)
         angle_x = next_angle_x(i)
-        send_command(ip, f"set_position 0 {angle_x}")
+        comm.send_command(f"set_position 0 {angle_x}")
         time.sleep(delta)
         angle_y = next_angle_y(i)
-        send_command(ip, f"set_position 1 {angle_y}")
+        comm.send_command(f"set_position 1 {angle_y}")
         i += 1
         if i > 360:
             i = 0

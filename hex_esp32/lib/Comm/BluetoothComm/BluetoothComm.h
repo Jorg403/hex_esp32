@@ -2,12 +2,15 @@
 #define BLUETOOTHCOMM_H
 
 #include "../IComm.h"
-#include <Arduino.h>
+#include <BluetoothSerial.h>
 
 class BluetoothComm : public IComm {
+private:
+    BluetoothSerial _btSerial;
+    String _incomingData;
+    
 public:
-    explicit BluetoothComm();
-
+    BluetoothComm();  // constructor
     void begin() override;
     bool available() override;
     String read() override;

@@ -31,3 +31,7 @@
 *.out
 *.app
 hex_esp32/lib/consts/WiFiConsts.cpp
+/hex_server/__pycache__
+/hex_server/lib/__pycache__
+/hex_server/lib/comm/__pycache__
+/hex_server/lib/robotics/pose_generation/__pycache__

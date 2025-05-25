@@ -17,7 +17,7 @@ void setup() {
     Serial.begin(115200);
     delay(1000);  // Wait for serial communication to stabilize
 
-    comm = new CommManager(CommManager::WIFI);
+    comm = new CommManager(CommManager::BLUETOOTH);
     comm->begin();
 
     // Create a FIFO queue to hold commands (with space for 10 commands)
@@ -73,7 +73,7 @@ void communicationTask(void *pvParameters) {
     while (true) {
         if (comm->available()) {
             String incomingCmd = comm->read();
-            //Serial.println("Command received: " + incomingCmd);
+            // Serial.println("Command received: " + incomingCmd);
 
             char cmdBuffer[__CMD_MAX_LEN__];
             incomingCmd.toCharArray(cmdBuffer, __CMD_MAX_LEN__);
@@ -81,6 +81,7 @@ void communicationTask(void *pvParameters) {
             if (xQueueSend(commandQueue, cmdBuffer, portMAX_DELAY) != pdPASS) {
                 Serial.println("Failed to add command to queue.");
             }
+            // Serial.println("Command added to queue: " + String(cmdBuffer));
         }
 
         delay(__DELTA_TIME__);
