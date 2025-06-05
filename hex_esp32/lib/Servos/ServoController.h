@@ -22,9 +22,9 @@ public:
     void enableServos();
     void disableServos();
     
-    // Function to set speed
-    void setSpeeds(std::vector<int> speeds);
-    void setSpeed(int servoIdx, int speed);
+    // Function to set speed DEPRECATED
+    // void setSpeeds(std::vector<int> speeds);
+    // void setSpeed(int servoIdx, int speed);
     
     // Main update function to move servos based on stored positions
     void update();
@@ -34,9 +34,9 @@ public:
 private:
     Adafruit_PWMServoDriver pwm;
     std::vector<float> servoAngles;  // Vector to store servo angles
-    std::vector<int> servoSpeeds;  // Vector to store speed of each servo
-    const int SERVO_COUNT = 3;  // Number of servos
-    bool servoEnabled[3];  // Array to store enabled state of each servo
+    // std::vector<int> servoSpeeds;  // Vector to store speed of each servo
+    const int ARM_COUNT = 3;  // Number of arms
+    std::vector<bool> servoEnabled;  // Array to store enabled state of each servo
 
     // Helper function to move the servo
     void move(int servoNum, float angle);

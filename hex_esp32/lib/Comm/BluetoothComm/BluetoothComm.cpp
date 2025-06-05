@@ -27,5 +27,5 @@ String BluetoothComm::read() {
 
 void BluetoothComm::send(const String& data) {
     // _btSerial.println(data);
-    Serial.println(data);  // log
+    // Serial.println(data);  // log
 }

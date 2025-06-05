@@ -50,11 +50,9 @@ def main():
         nonlocal pos, ik, goal_reached, travel_start_t
         thetas, reached = ik.calculate_joint_angles_dt(pos)
         if thetas[0] is not None and thetas[1] is not None and thetas[2] is not None:
-            comm.send_command(f"set_position 0 {thetas[0]}")
-            time.sleep(consts.DT/4)
-            comm.send_command(f"set_position 1 {thetas[1]}")
-            time.sleep(consts.DT/4)
-            comm.send_command(f"set_position 2 {thetas[2]}")
+            # set thetas decimals to 2
+            thetas = [round(theta, 2) for theta in thetas]
+            comm.send_command(f"set_positions {thetas[0]},{thetas[1]},{thetas[2]},{thetas[0]},{thetas[1]},{thetas[2]},{thetas[0]},{thetas[1]},{thetas[2]}")
         if goal_reached and not reached:
             travel_start_t = time.time()
         elif not goal_reached and reached:

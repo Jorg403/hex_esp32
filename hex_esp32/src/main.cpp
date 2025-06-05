@@ -43,29 +43,43 @@ void setup() {
 void loop() {
     unsigned long loopStartTime = millis();  // Start time
 
+    int count = 0;
+
     // Check if there are commands in the queue
     char cmdBuffer[__CMD_MAX_LEN__];
     if (xQueueReceive(commandQueue, cmdBuffer, 0) == pdTRUE) {
+        Serial.println("Command received: " + String(cmdBuffer));
         String cmd(cmdBuffer);
         String response = servoHandler->handleSrvCommand(cmd);
-        if (xQueueSend(responseQueue, response.c_str(), 0) != pdPASS) {
-            Serial.println("Failed to send response.");
-        }
+        // if (xQueueSend(responseQueue, response.c_str(), 0) != pdPASS) {
+        //     Serial.println("Failed to send response.");
+        // }
     }
+    // else {
+    //     Serial.println("No command received, checking for manual PWM...");
+    // }
 
     servoHandler->servoController.update();  // Update servo controller
 
     unsigned long loopEndTime = millis();
-    unsigned long loopDuration = loopEndTime - loopStartTime;
-    unsigned long delayTime = __DELTA_TIME__ - loopDuration;
+    long loopDuration = loopEndTime - loopStartTime;
+    long delayTime = __DELTA_TIME__ - loopDuration;
+
+    // Serial.print("Loop duration: ");
+    // Serial.print(loopDuration);
+    // Serial.print("ms, Delay time: ");
+    // Serial.print(delayTime);
+    // Serial.print("ms, loopEndTime: " + String(loopEndTime));
+    // Serial.print(", loopStartTime: " + String(loopStartTime));
+    // Serial.println(", delta time: " + String(__DELTA_TIME__));
 
     if (delayTime < 0) {
-        if (xQueueSend(responseQueue, "Loop took too long", 0) != pdPASS) {
-            Serial.println("Failed to send loop duration message.");
-        }
+        // Serial.println("Loop took too long: " + String(loopDuration) + "ms, skipping delay.");
     }
     if (delayTime > 0) {
+        // Serial.println("Loop duration: " + String(loopDuration) + "ms, delaying for: " + String(delayTime) + "ms");
         delay(delayTime);
+        // Serial.println("Delay complete.");
     }
 }
 
