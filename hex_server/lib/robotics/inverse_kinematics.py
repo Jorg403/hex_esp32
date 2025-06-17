@@ -17,6 +17,7 @@ def calculate_joint_angles(position):
         np.array: Joint angles [theta1, theta2, theta3] in degrees.
     """
     x, y, z = position
+    y = -y
     l1, l2, l3 = consts.LEG_LENGTHS
 
     # Calculate theta1 (base rotation)
@@ -30,10 +31,11 @@ def calculate_joint_angles(position):
     d = math.sqrt(z**2 + s**2)
 
     # Check if the target has collision with the base
-    base_col = not (x > consts.BASE_BOUNDING_BOX[0] or abs(y) > consts.BASE_BOUNDING_BOX[1] or z > consts.BASE_BOUNDING_BOX[2])
+    # base_col = not (x > consts.BASE_BOUNDING_BOX[0] or abs(y) > consts.BASE_BOUNDING_BOX[1] or z > consts.BASE_BOUNDING_BOX[2])
 
     # Check reachability
-    if d > (l2 + l3) or d < abs(l2 - l3) or base_col:
+    # if d > (l2 + l3) or d < abs(l2 - l3) or base_col:
+    if d > (l2 + l3) or d < abs(l2 - l3):
         print("Target is unreachable")
         return np.array([None, None, None])
 
@@ -55,7 +57,7 @@ class IKSolver:
         self.speeds = consts.MAX_SPEEDS
         self.pos = np.copy(position)
 
-    def calculate_joint_angles_dt(self, position):
+    def calculate_joint_angles_dt(self, position, step_by_step=False):
         """
         Calculate the joint angles using inverse kinematics. Time differential.
 
@@ -69,17 +71,17 @@ class IKSolver:
         goal_pos = np.copy(position)
 
         
-        speed = self.speeds["air"]
-        if self.pos[2] <= consts.GROUND_HEIGHT and goal_pos[2] <= consts.GROUND_HEIGHT:
-            goal_pos[2] = consts.GROUND_HEIGHT
-            speed = self.speeds["ground"]
+        # speed = self.speeds["air"]
+        # if self.pos[2] <= consts.GROUND_HEIGHT and goal_pos[2] <= consts.GROUND_HEIGHT:
+        #     goal_pos[2] = consts.GROUND_HEIGHT
+        #     speed = self.speeds["ground"]
 
-        if np.linalg.norm(goal_pos - self.pos) < speed * consts.DT:
-            new_pos = goal_pos
-            goal_reached = True
-        else:
-            new_pos = self.pos + (goal_pos - self.pos) * speed * consts.DT / np.linalg.norm(goal_pos - self.pos)
-            goal_reached = False
+        # if np.linalg.norm(goal_pos - self.pos) < speed * consts.DT or step_by_step:
+        new_pos = goal_pos
+        goal_reached = True
+        # else:
+        #     new_pos = self.pos + (goal_pos - self.pos) * speed * consts.DT / np.linalg.norm(goal_pos - self.pos)
+        #     goal_reached = False
             
         
         # print(f"Current position: {self.pos}")

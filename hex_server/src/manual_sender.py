@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+import numpy as np
 import argparse
 import requests
 from lib.comm.comm_constructor import create_comm
@@ -40,7 +41,9 @@ def main():
             command = f"set_manualPWM {parts[1]} {parts[2]}"
         elif command.startswith("pos "):
             parts = command.split()
-            angle0, angle1, angle2 = calculate_joint_angles(float(parts[1]), float(parts[2]), float(parts[3]))
+            # import pdb
+            # pdb.set_trace()
+            (angle0, angle1, angle2) = calculate_joint_angles(np.array((float(parts[1]), float(parts[2]), float(parts[3]))))
             comm.send_command(f"set_position 0 {angle0}")
             comm.send_command(f"set_position 1 {angle1}")
             comm.send_command(f"set_position 2 {angle2}")

@@ -17,4 +17,4 @@ const int __SERVO_0_PWMs__[] = {
 };
 
 const int __SERVO_MIN_POS__[] = {-60, -150, -130};  // Servo min positions for each servo
-const int __SERVO_MAX_POS__[] = {60, 30, 50};  // Servo max positions for each servo
+const int __SERVO_MAX_POS__[] = {60, 30, 45};  // Servo max positions for each servo
