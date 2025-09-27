@@ -26,8 +26,7 @@ class LoopHandler:
     def run(self):
         while True:
             start_time = time.time()
-            self.pose_gen.update()
-            pos = self.pose_gen.pos
+            pos = self.pose_gen.update()
             thetas_list = []
             for i in range(len(pos)):
                 pos_i = pos[i]

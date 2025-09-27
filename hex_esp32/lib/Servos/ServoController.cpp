@@ -1,7 +1,7 @@
 #include "ServoController.h"
 #include "Consts.h"
 
-ServoController::ServoController() : pwm(Adafruit_PWMServoDriver()) {
+ServoController::ServoController() : pwm(DualPWM(0x40, 0x41)) {
     for (int i = 0; i < ARM_COUNT; i++) {
         servoAngles.push_back(0.0);
         servoAngles.push_back(0.0);
@@ -20,11 +20,10 @@ ServoController::ServoController() : pwm(Adafruit_PWMServoDriver()) {
 void ServoController::begin() {
     pwm.begin();
     pwm.setPWMFreq(50);
-    delay(1000);  // Allow time for the PWM driver to initialize
     for (int i = 0; i < ARM_COUNT*3; i++) {
         servoAngles[i] = constrain(servoAngles[i], __SERVO_MIN_POS__[i%3], __SERVO_MAX_POS__[i%3]);
         move(i, servoAngles[i]);
-        delay(50);  // Small delay to allow servo to move
+        delay(1000);  // Small delay to allow servo to move
     }
     Serial.println("ServoController initialized.");
 }

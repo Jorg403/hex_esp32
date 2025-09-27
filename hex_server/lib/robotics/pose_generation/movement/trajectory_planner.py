@@ -24,12 +24,26 @@ def generate_new_positions(current_positions, target_positions, speed):
         # Determine phase: swing (air) or stance (ground)
         is_air = delta[2] > 1e-2  # Heuristic: Z increases -> leg is lifting
         speed_factor = consts.MAX_SPEEDS['air'] if is_air else consts.MAX_SPEEDS['ground']
-        step = delta / dist * speed_factor * speed
+        step = (delta / dist) * speed_factor * speed * consts.DT
 
+        # print("---- leg", i, "----")
+        # print("target", target_positions[i])
+        # print("current", current_positions[i])
+        # print("step", step)
+        # print("delta", delta)
+        
+        # print("dist", dist, "speed_factor", speed_factor, "speed", speed)
         # Overshoot check
-        if np.linalg.norm(step) >= dist:
-            new_positions[i] = np.copy(target_positions[i])
-        else:
-            new_positions[i] += step
+        for j in range(3):
+            if abs(step[j]) >= abs(delta[j]):
+                new_positions[i][j] = target_positions[i][j]
+            else:
+                new_positions[i][j] += step[j]
+        # print("new pos", new_positions[i])
+        # if np.linalg.norm(step) >= dist:
+        #     print("--------overshoot--------")
+        #     new_positions[i] = np.copy(target_positions[i])
+        # else:
+        #     new_positions[i] += step
 
     return new_positions

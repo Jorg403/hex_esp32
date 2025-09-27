@@ -31,7 +31,7 @@ def main():
         comm = create_comm('print')
 
     # Initialize control components
-    pose_gen = create_pose_generator('controller', window_size=args.size)
+    pose_gen = create_pose_generator('mouse', window_size=args.size)
     loop_handler = LoopHandler(pose_gen, comm)
     loop_handler.start()
 
@@ -39,7 +39,7 @@ def main():
     while True:
         frame = np.zeros((args.size, args.size, 3), dtype=np.uint8)
         with pose_gen.lock:
-            pos = pose_gen.pos.copy()
+            pos = pose_gen.pos[0].copy()
             plane = pose_gen.plane
             last = np.round(pose_gen.last_win_pos.copy()).astype(int)
 

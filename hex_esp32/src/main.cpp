@@ -35,9 +35,11 @@ void setup() {
         0                   // Run on Core 0
     );
 
+    
     ServoController* servoController = new ServoController();
     servoController->begin();  // Initialize the servo controller
     servoHandler = new ServoHandler(*servoController);  // Create the servo handler with the controller
+
 }
 
 void loop() {
