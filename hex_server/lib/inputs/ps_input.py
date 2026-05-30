@@ -13,6 +13,7 @@ class PSInput:
         self.triggers = [0, 0]  # L2, R2
         self.running = False
         self.x_button = False
+        self.triangle_button = False
         self.changed = True
 
         self.controller = self._init_controller()
@@ -26,8 +27,8 @@ class PSInput:
         controller = DualSenseController(
             device_index_or_device_info=devices[0],
             mapping=Mapping.RAW,
-            left_joystick_deadzone=5,
-            right_joystick_deadzone=5,
+            left_joystick_deadzone=10,
+            right_joystick_deadzone=10,
             update_level=UpdateLevel.DEFAULT,
         )
         controller.activate()
@@ -42,14 +43,18 @@ class PSInput:
 
         # Buttons
         controller.btn_cross.on_down(self._cross_pressed)
-
+        controller.btn_triangle.on_down(self._triangle_pressed)
         return controller
     
     def _cross_pressed(self):
         with self.lock:
             self.x_button = True
             self.changed = True
-            
+
+    def _triangle_pressed(self):
+        with self.lock:
+            self.triangle_button = True
+            self.changed = True
 
     def _on_left_stick(self, x, y):
         with self.lock:
@@ -81,7 +86,9 @@ class PSInput:
             if not self.changed:
                 return None
             x_button = self.x_button
+            triangle_button = self.triangle_button
             self.x_button = False  # reset after reading
+            self.triangle_button = False
             lx, ly = self.left_joystick
             rx, ry = self.right_joystick
             l2, r2 = self.triggers
@@ -89,6 +96,7 @@ class PSInput:
 
         return {
             "x": x_button,
+            "triangle": triangle_button,
             "lx": lx / 127.5,   # [-1, 1]
             "ly": ly / 127.5,
             "rx": rx / 127.5,

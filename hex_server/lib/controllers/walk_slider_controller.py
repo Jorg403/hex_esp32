@@ -39,13 +39,14 @@ class WalkSliderController(WalkController):
             current_direction = np.zeros(2, dtype=np.float32)
 
         return {
-            "direction": current_direction,
-            "speed": min(current_speed, 1.0),
-            "fwd_back": fwd_back,
-            "left_right": left_right,
-            "up_down": up_down,
-            "roll": roll,
-            "pitch": pitch,
-            "yaw": yaw,
-            "rotation_speed": w
+            "direction":      current_direction,
+            "speed":          min(current_speed, 1.0),
+            "fwd_back":       fwd_back,
+            "left_right":     left_right,
+            "up_down":        up_down,
+            "roll":           roll,
+            "pitch":          pitch,
+            "yaw":            yaw,
+            "rotation_speed": w,
+            "gait":           None,
         }
