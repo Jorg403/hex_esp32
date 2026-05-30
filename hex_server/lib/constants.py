@@ -6,18 +6,20 @@ SERVO_MAX_POS = [90, 30, 50]
 DT = 0.05  # Time step in seconds
 
 # GROUND_HEIGHT = -11
-GROUND_HEIGHT = -3
+GROUND_HEIGHT = -8
 GENERAL_SPEED = 50
+IDLING_SPEED = 0.005 * GENERAL_SPEED  # Speed when idling in cm/s
 MAX_SPEEDS = {"ground": GENERAL_SPEED*1.0, "air": GENERAL_SPEED*2.0 } # Speeds for ground/air movement in cm/s
 BASE_BOUNDING_BOX = [6.5, 8.5, -3.5]  # Bounding box for the robot base in cm
 
 # LEG_LENGTHS = [5.0, 6.0, 10.0]  # Lengths of the legs in cm
-LEG_LENGTHS = [6.0, 6.0, 5.9]
+# LEG_LENGTHS = [6.0, 6.0, 5.9]
+LEG_LENGTHS = [6.0, 6.0, 10.0]
 
 ENGINE1_HEIGHT = 0
 
 # Transformation matrices for leg positions relative to the base
-__SIDES_OFFSET_Y__ = 9.02  # offset in y for legs 1 and 4
+__SIDES_OFFSET_Y__ = 9.0  # offset in y for legs 1 and 4
 __SIDES_OFFSET_X__ = 0.0  # offset in x for legs 1 and 4
 __SIDES_ROTATION__ = np.radians(90)
 TM_BODY_LEG1 = np.array([
@@ -34,8 +36,8 @@ TM_BODY_LEG4 = np.array([
     [0, 0, 0, 1]
 ], dtype=np.float32)
 
-__CORNERS_OFFSET_Y__ = 12.0  # offset in y for legs 0 and 3
-__CORNERS_OFFSET_X__ = 12.0  # offset in x for legs 0 and 3
+__CORNERS_OFFSET_Y__ = 4.85  # offset in y for legs 0 and 3
+__CORNERS_OFFSET_X__ = 8.7  # offset in x for legs 0 and 3
 __CORNERS_ROTATION__ = np.radians(30)
 TM_BODY_LEG0 = np.array([
     [np.cos(-__CORNERS_ROTATION__), -np.sin(-__CORNERS_ROTATION__), 0, __CORNERS_OFFSET_X__],

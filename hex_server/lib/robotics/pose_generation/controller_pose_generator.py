@@ -17,6 +17,7 @@ class ControllerPoseGenerator(PoseGenerator):
         self.right_joystick = [0, 0]
         self.old_left_joystick = [0, 0]
         self.old_right_joystick = [0, 0]
+        self.leg = 0
         self._start_input_loop()
 
     def _init_controller(self):
@@ -40,8 +41,14 @@ class ControllerPoseGenerator(PoseGenerator):
 
         # Plane toggle (X / Cross button)
         controller.btn_cross.on_down(self._cycle_plane)
+        controller.btn_circle.on_down(self._cycle_leg)
 
         return controller
+
+    def _cycle_leg(self):
+        with self.lock:
+            self.leg = (self.leg + 1) % 6
+            print(f"Switched to leg: {self.leg}")
 
     def _cycle_plane(self):
         with self.lock:
@@ -78,27 +85,28 @@ class ControllerPoseGenerator(PoseGenerator):
                 # print(f"Joystick: {self.left_joystick}, {self.right_joystick}")
 
                 if self.plane == 'xy':
-                    self.pos[0] += dx
-                    self.pos[1] += dy
-                    self.pos[2] += -dz
+                    self.pos[self.leg][0] += dx
+                    self.pos[self.leg][1] += dy
+                    self.pos[self.leg][2] += -dz
                 elif self.plane == 'xz':
-                    self.pos[0] += dx
-                    self.pos[1] += -dz
-                    self.pos[2] += -dy
+                    self.pos[self.leg][0] += dx
+                    self.pos[self.leg][1] += -dz
+                    self.pos[self.leg][2] += -dy
                 elif self.plane == 'yz':
-                    self.pos[0] += -dz
-                    self.pos[1] += dx
-                    self.pos[2] += -dy
+                    self.pos[self.leg][0] += -dz
+                    self.pos[self.leg][1] += dx
+                    self.pos[self.leg][2] += -dy
 
-                self.pos = [
-                    max(min(p, 21), -21) for p in self.pos
+                self.pos[self.leg] = [
+                    max(min(p, 21), -21) for p in self.pos[self.leg]
                 ]
-                self.pos[0] = max(self.pos[0],0)
+                # self.pos[0] = max(self.pos[0],0)
 
                 self.old_left_joystick = self.left_joystick.copy()
                 self.old_right_joystick = self.right_joystick.copy()
 
-                self.last_win_pos = self.window_size*(np.array([0,0.5,0.5])+self.pos/np.array([21,42,-42]))
+                self.last_win_pos = self.window_size*(np.array([0,0.5,0.5])+self.pos[self.leg]/np.array([21,42,-42]))
+        return self.pos
 
     def _scale(self, val):
         """Scale joystick value to movement increment."""

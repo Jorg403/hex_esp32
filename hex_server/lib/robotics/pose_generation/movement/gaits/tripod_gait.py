@@ -9,8 +9,8 @@ class TripodGaitEngine(GaitEngine):
         self.leg_groups = np.array([[0, 2, 4], [1, 3, 5]], dtype=np.int32)
 
         self.last_direction = np.array([0.0, 0.0], dtype=np.float32)
-        self.stp = 3.0
-        self.lift = 4.0
+        self.stp = 5.0
+        self.lift = 3.0
 
         self.direction = self._generate_goal(self.last_direction)
         self.n_phases = 6
@@ -44,10 +44,12 @@ class TripodGaitEngine(GaitEngine):
     def get_step_targets(self, leg_positions: np.ndarray, direction_vec: np.ndarray, target_positions: np.ndarray, is_at_target: bool) -> dict:
         # print("Current state:", self.state)
         # return consts.INITIAL_POSITIONS_BODY.copy()
-        if (self.state == State.IDLE or self.phase_counter%3 != 0) and not np.allclose(direction_vec, self.last_direction):
+        print("State:", self.state, "Phase:", self.phase_counter, "Swing group:", self.current_swing_group)
+        if not np.allclose(direction_vec, self.last_direction):
             self.direction = self._generate_goal(direction_vec)
             self.last_direction = direction_vec.copy()
-            if self.state == State.WALKING and np.linalg.norm(direction_vec) == 0:
+            if np.linalg.norm(direction_vec) == 0:
+                print("Switching to IDLING")
                 self.state = State.IDLING
                 self.phase_counter = 1
                 self.target_positions = self._get_idling_targets(leg_positions)

@@ -11,6 +11,9 @@ class PoseGenerator(abc.ABC):
 
         self.tm_base_body = np.eye(4, dtype=np.float32)
         self.tm_body_base = np.eye(4, dtype=np.float32)
+
+        self.base_world = np.eye(4, dtype=np.float32)
+        self.world_base = np.eye(4, dtype=np.float32)
         
         # poses_base = leg_to_base(self.pos, self.tm_base_body)
 
