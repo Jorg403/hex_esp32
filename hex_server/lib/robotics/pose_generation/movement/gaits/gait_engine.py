@@ -53,6 +53,7 @@ class GaitEngine:
         return (direction_vec * self.stp / 2.0
                 + tangent * rotation_speed * self.ROT_SCALE * self.stp / 2.0)
 
+    # TODO - add a "swing height" parameter to leg_groups and interpolate z in _walk_targets for smoother motion?
     def _walk_targets(self, swing_group, phase_in_group, direction_vec, rotation_speed):
         targets = consts.INITIAL_POSITIONS_BODY.copy()
         swing_legs = self.leg_groups[swing_group]

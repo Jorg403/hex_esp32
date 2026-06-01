@@ -3,12 +3,13 @@ import numpy as np
 SERVO_MIN_POS = [-90, -150, -130]
 SERVO_MAX_POS = [90, 30, 50]
 
-DT = 0.05  # Time step in seconds
+# DT = 0.05  # Time step in seconds
+DT = 0.01  # ONLY FOR SIMULATION
 
 # GROUND_HEIGHT = -11
 GROUND_HEIGHT = -8
 # GENERAL_SPEED = 50
-GENERAL_SPEED = 100 # ONLY FOR SIMULATION
+GENERAL_SPEED = 25 # ONLY FOR SIMULATION
 IDLING_SPEED = 0.005 * GENERAL_SPEED  # Speed when idling in cm/s
 MAX_SPEEDS = {"ground": GENERAL_SPEED*1.0, "air": GENERAL_SPEED*2.0 } # Speeds for ground/air movement in cm/s
 BASE_BOUNDING_BOX = [6.5, 8.5, -3.5]  # Bounding box for the robot base in cm

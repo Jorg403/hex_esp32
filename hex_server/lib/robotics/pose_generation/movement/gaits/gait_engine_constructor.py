@@ -1,11 +1,11 @@
 from lib.robotics.pose_generation.movement.gaits.tripod_gait import TripodGaitEngine
 from lib.robotics.pose_generation.movement.gaits.ripple_gait import RippleGaitEngine
-from lib.robotics.pose_generation.movement.gaits.two_leg_gait import TwoLegGaitEngine
+from lib.robotics.pose_generation.movement.gaits.monopod_gait import MonopodGaitEngine
 
 _GAIT_MAP = {
     'tripod':  TripodGaitEngine,
     'ripple':  RippleGaitEngine,
-    'two_leg': TwoLegGaitEngine,
+    'monopod': MonopodGaitEngine,
 }
 
 GAIT_NAMES = list(_GAIT_MAP.keys())

@@ -7,7 +7,7 @@ Run:  python src/ps_gait_demo.py
 
 Controls (PS5 controller):
   X button   — cycle mode: body-pos / tilt / locomotion
-  Options    — (mode 2) cycle gait: tripod → ripple → two_leg
+  Options    — (mode 2) cycle gait: tripod → ripple → monopod
   Mode 0     — L-stick X/Y = body shift, R-stick Y = height
   Mode 1     — L-stick = roll/pitch, R-stick X = yaw
   Mode 2     — L-stick = walk direction, R-stick X = rotate in place
@@ -55,7 +55,7 @@ C_WARN      = (0,   100, 220)
 C_GAIT_CLR  = {
     'tripod':  (60,  200, 60),
     'ripple':  (0,   165, 255),
-    'two_leg': (180, 60,  220),
+    'monopod': (180, 60,  220),
 }
 
 MODE_NAMES = ['Body position', 'Body tilt', 'Locomotion']

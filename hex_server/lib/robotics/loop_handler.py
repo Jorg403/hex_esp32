@@ -51,7 +51,7 @@ class LoopHandler:
             # self.goal_reached = reached
 
             # if __STEP_BY_STEP__:
-            time.sleep(0.10)
+            # time.sleep(0.10)
             # input("Press Enter to continue...")
             # import pdb; pdb.set_trace()
 
