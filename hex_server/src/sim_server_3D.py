@@ -270,7 +270,7 @@ class SimState:
             self.body_world = body_world
             self.body_theta = float(theta)
             self.body_z     = body_z
-            self.body_trail.append(np.array([body_world[0], body_world[1], body_z + GZ + 1.0],
+            self.body_trail.append(np.array([body_world[0], body_world[1], body_z+1.0],
                                              dtype=np.float32))
             if len(self.body_trail) > TRAIL_LENGTH:
                 self.body_trail.pop(0)
@@ -371,10 +371,6 @@ class OrbitCamera:
 
 # ── OpenGL drawing helpers ─────────────────────────────────────────────────────
 
-# GZ: shift applied to all Z vertices so GROUND_HEIGHT maps to Z=0
-GZ = -consts.GROUND_HEIGHT   # e.g. +8.0 when GROUND_HEIGHT=-8
-
-
 def set_proj(w, h, fov=45.0, near=1.0, far=5000.0):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
@@ -385,7 +381,7 @@ def draw_grid(span=100, step=5):
     """XY-plane grid centred at origin."""
     glLineWidth(1.0)
     glBegin(GL_LINES)
-    z = consts.GROUND_HEIGHT
+    z = consts.GROUND_HEIGHT - 0.5
     for x in np.arange(-span, span+step, step):
         alpha = 0.15 if (x % 20) != 0 else 0.30
         glColor4f(0.9, 0.9, 0.9, alpha)
@@ -517,7 +513,7 @@ def draw_legs_3d(seg_body, body_world, body_z, theta, foot_world, is_stance):
 
         # Ground contact marker (flat circle approximated as cross)
         if stance:
-            gnd_z = -0.2
+            gnd_z = consts.GROUND_HEIGHT - 0.2
             glLineWidth(1.0)
             glColor4f(0.3, 0.9, 0.3, 0.5)
             glBegin(GL_LINES)
@@ -789,7 +785,6 @@ def main():
         # Soft-follow camera
         cam.soft_follow(body_world, alpha=0.03)
         cam.apply()
-        glTranslatef(0.0, 0.0, GZ)   # shift ground to Z=0
 
         draw_grid()
         draw_trail(trail)

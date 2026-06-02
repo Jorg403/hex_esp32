@@ -85,13 +85,11 @@ class GaitPoseGenerator(PoseGenerator):
 
         # Gait engine operates in body frame
         pos_body = leg_to_base(self.pos, self.tm_base_body)
-        tgt_body = leg_to_base(self.target_positions, self.tm_base_body)
 
         new_tgt_body = self.gait_engine.get_step_targets(
             pos_body,
             self.current_direction,
             self.rotation_speed,
-            tgt_body,
             is_at_target,
         )
 

@@ -15,7 +15,7 @@ PS5 controls
   ── Mode 2  [locomotion] ─────────────────────────────────
   L-stick         walk direction
   R-stick X       rotate in place
-  Options         cycle gait: tripod → ripple → monopod
+  Options         cycle gait: tripod → ripple → monopod → dog
 """
 
 import sys

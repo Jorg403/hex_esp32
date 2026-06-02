@@ -17,7 +17,7 @@ Usage
 Controls (DualSense / PS5)
 --------------------------
   X              Cycle mode: body-pos → tilt → locomotion  (lightbar changes colour)
-  Options        (mode 2 only) Cycle gait: tripod → ripple → monopod
+  Options        (mode 2 only) Cycle gait: tripod → ripple → monopod → dog
 
   Mode 0  [body position]  — green lightbar
     L-stick X/Y  Shift body left / right and forward / back

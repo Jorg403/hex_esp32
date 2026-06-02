@@ -19,12 +19,16 @@ class GaitEngine:
     """
 
     # Subclasses override these as class attributes
-    leg_groups = []      # list of np.int32 arrays
-    stp = 5.0            # half-stroke in cm  (foot travels ±stp/2 from home)
-    lift = 3.0           # foot lift height in cm
-    ROT_SCALE = 50.0     # rotation_speed → gait units  (matches rx/10 range)
+    leg_groups = []             # list of np.int32 arrays
+    dead_legs = []              # list of leg indices that don't move in this gait
+    stp = consts.STEP_LENGTH    # half-stroke in cm  (foot travels ±stp/2 from home)
+    lift = consts.LIFT_HEIGHT   # foot lift height in cm
+    ROT_SCALE = 50.0            # rotation_speed → gait units  (matches rx/10 range)
+    step_phases = 3             # number of phases in a full step cycle (e.g. lift, forward, down)
+    idle_phases = 2             # number of phases in a full idle cycle (e.g. lift, down)
 
     def __init__(self):
+        self.phase_to_print = 0
         self.current_swing_group = 0
         self.phase_counter = 0
         self.state = State.IDLE
@@ -38,11 +42,11 @@ class GaitEngine:
 
     @property
     def _n_walk_phases(self):
-        return self._n_groups * 3
+        return self._n_groups * self.step_phases
 
     @property
     def _n_idle_phases(self):
-        return self._n_groups * 2
+        return self._n_groups * self.idle_phases
 
     def _per_leg_step(self, leg_idx, direction_vec, rotation_speed):
         """Per-leg step vector combining translation and rotation."""
@@ -50,8 +54,7 @@ class GaitEngine:
         px, py = home[0], home[1]
         r = np.hypot(px, py)
         tangent = np.array([-py, px]) / r if r > 1e-6 else np.zeros(2)
-        return (direction_vec * self.stp / 2.0
-                + tangent * rotation_speed * self.ROT_SCALE * self.stp / 2.0)
+        return (direction_vec + tangent * rotation_speed * self.ROT_SCALE) * self.stp / (2.0 * (self._n_groups - 1))
 
     # TODO - add a "swing height" parameter to leg_groups and interpolate z in _walk_targets for smoother motion?
     def _walk_targets(self, swing_group, phase_in_group, direction_vec, rotation_speed):
@@ -64,7 +67,8 @@ class GaitEngine:
         for leg in swing_legs:
             d = self._per_leg_step(leg, direction_vec, rotation_speed)
             if phase_in_group == 0:
-                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([-d[0], -d[1], self.lift])
+                targets[leg] = self.current_leg_positions[leg]
+                targets[leg][2] = consts.INITIAL_POSITIONS_BODY[leg][2] + self.lift
             elif phase_in_group == 1:
                 targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ d[0],  d[1], self.lift])
             else:
@@ -73,18 +77,21 @@ class GaitEngine:
         for leg in stance_legs:
             d = self._per_leg_step(leg, direction_vec, rotation_speed)
             if phase_in_group == 0:
-                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([d[0], d[1], 0.0])
+                targets[leg] = self.current_leg_positions[leg]
             else:
                 targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([-d[0], -d[1], 0.0])
 
+            if leg == 1 and self.phase_to_print == phase_in_group:
+                print("phase:", phase_in_group, "current:", self.current_leg_positions[leg], "target:", targets[leg], "d:", d)
+                self.phase_to_print = (self.phase_to_print + 1) % 3
         return targets
 
     def _idle_targets(self):
         """Return legs to home one group at a time (lift then land)."""
         targets = consts.INITIAL_POSITIONS_BODY.copy()
-        group_idx = (self.phase_counter // 2) % self._n_groups
+        group_idx = (self.current_swing_group + self.phase_counter // self.idle_phases) % self._n_groups
         swing_legs = self.leg_groups[group_idx]
-        if self.phase_counter % 2 == 0:   # lift phase
+        if self.phase_counter % self.idle_phases == 0:   # lift phase
             targets[swing_legs] = (consts.INITIAL_POSITIONS_BODY[swing_legs]
                                    + np.array([0.0, 0.0, self.lift]))
         # odd phase: land at home (already the default in targets)
@@ -93,12 +100,15 @@ class GaitEngine:
     # ------------------------------------------------------------------ main
 
     def get_step_targets(self, leg_positions, direction_vec, rotation_speed,
-                         target_positions, is_at_target):
+                         is_at_target):
         """
         Called every control loop tick.
         leg_positions, target_positions: (6,3) in body frame.
         Returns (6,3) target positions in body frame.
         """
+
+        self.current_leg_positions = leg_positions
+
         moving = (np.linalg.norm(direction_vec) > 0.01
                   or abs(rotation_speed) > 0.001)
 
@@ -116,6 +126,7 @@ class GaitEngine:
         # walking → idling when input stops
         if self.state == State.WALKING and not moving:
             self.state = State.IDLING
+            self.current_swing_group = self.current_swing_group
             self.phase_counter = 0
             self.target_positions = self._idle_targets()
 
@@ -130,12 +141,15 @@ class GaitEngine:
         # --- walking tick -----------------------------------------------------
         if self.state == State.WALKING:
             if is_at_target:
-                if self.phase_counter % 3 == 2:
+                if self.phase_counter % self.step_phases == self.step_phases - 1:
                     self.current_swing_group = (self.current_swing_group + 1) % self._n_groups
                 self.phase_counter = (self.phase_counter + 1) % self._n_walk_phases
-            phase_in_group = self.phase_counter % 3
+            phase_in_group = self.phase_counter % self.step_phases
             self.target_positions = self._walk_targets(
                 self.current_swing_group, phase_in_group, direction_vec, rotation_speed
             )
+
+        if len(self.dead_legs) > 0:
+            self.target_positions[self.dead_legs] = consts.INITIAL_POSITIONS_BODY[self.dead_legs] + np.array([0.0, 0.0, self.lift])
 
         return self.target_positions
