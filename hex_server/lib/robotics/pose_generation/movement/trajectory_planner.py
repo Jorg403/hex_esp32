@@ -1,7 +1,7 @@
 import numpy as np
 import lib.constants as consts
 
-def generate_new_positions(current_positions, target_positions, speed):
+def generate_new_positions(current_positions, target_positions, is_air, speed):
     """
     Advance each leg position toward its target based on speed.
     
@@ -22,8 +22,8 @@ def generate_new_positions(current_positions, target_positions, speed):
             continue  # Already at target
 
         # Determine phase: swing (air) or stance (ground)
-        is_air = delta[2] > 1e-2  # Heuristic: Z increases -> leg is lifting
-        speed_factor = consts.MAX_SPEEDS['air'] if is_air else consts.MAX_SPEEDS['ground']
+        # is_air = delta[2] > 1e-2  # Heuristic: Z increases -> leg is lifting
+        speed_factor = consts.MAX_SPEEDS['air'] if is_air[i] else consts.MAX_SPEEDS['ground']
         step = (delta / dist) * speed_factor * speed * consts.DT
 
         # print("---- leg", i, "----")

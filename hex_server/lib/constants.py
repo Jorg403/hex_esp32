@@ -9,9 +9,9 @@ DT = 0.05  # Time step in seconds
 # GROUND_HEIGHT = -11
 GROUND_HEIGHT = -8
 GENERAL_SPEED = 50
-# GENERAL_SPEED = 300 # ONLY FOR SIMULATION
+# GENERAL_SPEED = 50 # ONLY FOR SIMULATION
 IDLING_SPEED = 0.005 * GENERAL_SPEED  # Speed when idling in cm/s
-MAX_SPEEDS = {"ground": GENERAL_SPEED*1.0, "air": GENERAL_SPEED*2.0 } # Speeds for ground/air movement in cm/s
+MAX_SPEEDS = {"ground": GENERAL_SPEED*1.0, "air": GENERAL_SPEED*3.0 } # Speeds for ground/air movement in cm/s
 BASE_BOUNDING_BOX = [6.5, 8.5, -3.5]  # Bounding box for the robot base in cm
 
 STEP_LENGTH = 5.0  # half-stroke in cm  (foot travels ±stp/2 from home)

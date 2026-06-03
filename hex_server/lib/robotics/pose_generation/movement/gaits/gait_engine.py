@@ -24,8 +24,10 @@ class GaitEngine:
     stp = consts.STEP_LENGTH    # half-stroke in cm  (foot travels ±stp/2 from home)
     lift = consts.LIFT_HEIGHT   # foot lift height in cm
     ROT_SCALE = 50.0            # rotation_speed → gait units  (matches rx/10 range)
-    step_phases = 3             # number of phases in a full step cycle (e.g. lift, forward, down)
+    step_phases = 4             # number of phases in a full step cycle (e.g. lift, forward, down)
     idle_phases = 2             # number of phases in a full idle cycle (e.g. lift, down)
+    transition_height = 1.0     # height to lift legs when transitioning between gaits (to avoid dragging)
+    agr = 0.3
 
     def __init__(self):
         self.phase_to_print = 0
@@ -68,16 +70,22 @@ class GaitEngine:
             d = self._per_leg_step(leg, direction_vec, rotation_speed)
             if phase_in_group == 0:
                 targets[leg] = self.current_leg_positions[leg]
-                targets[leg][2] = consts.INITIAL_POSITIONS_BODY[leg][2] + self.lift
+                targets[leg][2] = consts.GROUND_HEIGHT + self.transition_height
             elif phase_in_group == 1:
-                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ d[0],  d[1], self.lift])
+                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ 0,  0, self.lift])
+            elif phase_in_group == 2:
+                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ d[0],  d[1], self.transition_height])
             else:
-                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ d[0],  d[1], 0.0])
+                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([ d[0]*self.agr,  d[1]*self.agr, 0.0])
 
         for leg in stance_legs:
             d = self._per_leg_step(leg, direction_vec, rotation_speed)
             if phase_in_group == 0:
                 targets[leg] = self.current_leg_positions[leg]
+            elif phase_in_group == 1:
+                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg]
+            elif phase_in_group == 2:
+                targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([-d[0]*self.agr, -d[1]*self.agr, 0.0])
             else:
                 targets[leg] = consts.INITIAL_POSITIONS_BODY[leg] + np.array([-d[0], -d[1], 0.0])
 

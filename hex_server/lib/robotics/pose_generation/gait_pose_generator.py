@@ -100,6 +100,9 @@ class GaitPoseGenerator(PoseGenerator):
         speed = (effective_speed
                  if self.gait_engine.state != State.IDLING
                  else consts.IDLING_SPEED)
+        is_air = np.zeros(6, dtype=bool)
+        airs = self.gait_engine.leg_groups[self.gait_engine.current_swing_group]
+        is_air[airs] = True
 
-        self.pos = generate_new_positions(self.pos, self.target_positions, speed=speed)
+        self.pos = generate_new_positions(self.pos, self.target_positions, is_air, speed=speed)
         return self.pos
